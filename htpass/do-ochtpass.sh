@@ -1,8 +1,4 @@
 #
-#users.htpasswd
-#"admin:$2y$05$VhZypD.p5MYEirPowznOWuHMP5VP/TCR2937P0M1eC/IzxGPXDtYC"    # rh123 
-#"molnars:$5$UEopIKSNjuX810EG$Jkr9Qe95seGmh4UqUIo5wmQffFcYkam6L0OXyjWJyCA"
-
 #
 oc create secret generic htpass-secret --from-file=htpasswd=users.htpasswd -n openshift-config
 oc apply -f htp-oauth.yaml
