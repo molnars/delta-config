@@ -1,0 +1,44 @@
+#
+#users.htpasswd
+#"admin:$2y$05$VhZypD.p5MYEirPowznOWuHMP5VP/TCR2937P0M1eC/IzxGPXDtYC"    # rh123 
+#"molnars:$5$UEopIKSNjuX810EG$Jkr9Qe95seGmh4UqUIo5wmQffFcYkam6L0OXyjWJyCA"
+
+#
+oc create secret generic htpass-secret --from-file=htpasswd=users.htpasswd -n openshift-config
+oc apply -f htp-oauth.yaml
+oc adm policy add-cluster-role-to-user cluster-admin admin
+oc adm policy add-cluster-role-to-user cluster-admin molnars
+
+MYBASE64STRING=$(echo core:$(printf "redhat123" | openssl passwd -6 --stdin) | base64 -w0)
+cat << EOF > 99-set-core-passwd.yaml
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: 99-worker-set-core-passwd
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    storage:
+      files:
+      - contents:
+          source: data:text/plain;charset=utf-8;base64,$MYBASE64STRING
+        mode: 420
+        overwrite: true
+        path: /etc/core.passwd
+    systemd:
+      units:
+      - name: set-core-passwd.service
+        enabled: true
+        contents: |
+          [Unit]
+          Description=Set 'core' user password for out-of-band login
+          [Service]
+          Type=oneshot
+          ExecStart=/bin/sh -c 'chpasswd -e < /etc/core.passwd'
+          [Install]
+          WantedBy=multi-user.target
+EOF
+
