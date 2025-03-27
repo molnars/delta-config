@@ -1,10 +1,13 @@
 #
 #
 if [ -f users.htpasswd ]; then
-  htpasswd -B users.htpasswd admin
+  #htpasswd -B users.htpasswd admin
+  echo 'htpasswd file present'
 else
+  echo 'add user to new htpasswd file'
   htpasswd -c -B users.htpasswd admin
 fi
+
 
 oc create secret generic htpass-secret --from-file=htpasswd=users.htpasswd -n openshift-config
 oc apply -f htp-oauth.yaml
