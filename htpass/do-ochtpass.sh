@@ -1,5 +1,11 @@
 #
 #
+if [ -f users.htpasswd ]; then
+  htpasswd -B users.htpasswd admin
+else
+  htpasswd -c -B users.htpasswd admin
+fi
+
 oc create secret generic htpass-secret --from-file=htpasswd=users.htpasswd -n openshift-config
 oc apply -f htp-oauth.yaml
 oc adm policy add-cluster-role-to-user cluster-admin admin
