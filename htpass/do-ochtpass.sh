@@ -14,7 +14,8 @@ oc apply -f htp-oauth.yaml
 oc adm policy add-cluster-role-to-user cluster-admin admin
 oc adm policy add-cluster-role-to-user cluster-admin molnars
 
-MYBASE64STRING=$(echo core:$(printf "<<CHANGEME>>" | openssl passwd -6 --stdin) | base64 -w0)
+echo "Enter your password: "; read -s corepassword
+MYBASE64STRING=$(echo core:$(echo $corepassword) | openssl passwd -6 --stdin) | base64 -w0)
 cat << EOF > 99-set-core-passwd.yaml
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfig
